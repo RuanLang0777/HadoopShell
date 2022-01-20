@@ -113,13 +113,11 @@ if __name__ == '__main__':
     target = args.target
     address = args.address
 
-    if target != "":
+    if target != "" and address == "":
         code = unauthorized_scan(target)
         if code == 1:
             validation(target)
         else:
             print("Target inaccessible!")
-    else:
-        print("Usage: python Hadoop.py -t https://target.com")
     if target != "" and address != "":
         rebound(target, address)
