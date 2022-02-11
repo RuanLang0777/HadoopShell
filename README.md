@@ -1,10 +1,1 @@
-usage: python Hadoop.py -t http://target.com
-
-Hadoop GetShell [Zoomeye:app:Hadoop YARN]
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -t TARGET, --target TARGET
-                        attack target
-  -a ADDRESS, --address ADDRESS
-                        Remote VPS listening address(127.0.0.1:9999)
+![INFO](https://user-images.githubusercontent.com/53397197/153526019-e20867bf-376b-4b8c-bc23-1d259cbc8e15.png)
